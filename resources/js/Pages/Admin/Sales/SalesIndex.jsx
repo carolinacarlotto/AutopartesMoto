@@ -225,13 +225,18 @@ export default function SalesIndex() {
                 title="Crear Venta"
                 size="full"
             >
-                <SaleForm
-                    onSaleCreated={(saleData) => {
-                        window.location.reload();
-                        /*setCreateProductModal(false);
-                        fetchSales(); // Refresh sales data after creating a sale*/
+                <div
+                    style={{
+                        maxHeight: "calc(100vh - 200px)",
+                        overflowY: "auto",
                     }}
-                />
+                >
+                    <SaleForm
+                        onSaleCreated={(saleData) => {
+                            window.location.reload();
+                        }}
+                    />
+                </div>
             </Modal>
 
             <Modal
