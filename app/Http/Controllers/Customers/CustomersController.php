@@ -52,6 +52,9 @@ class CustomersController extends Controller
             'document_type' => 'nullable|string|max:50|in:dni,ruc,passport',
             'document_number' => 'nullable|string|max:50|unique:customers,document_number',
             'contact_name' => 'nullable|string|max:255',
+        ],
+        [
+            'document_number.unique' => 'El número de documento ya está registrado.',
         ]);
 
         // If the customer type is business, ensure company_name is provided

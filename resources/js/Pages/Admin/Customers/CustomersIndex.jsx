@@ -16,8 +16,11 @@ import {
     createCustomer,
 } from "@/Services/customer.js";
 
+import { useNotification } from "@/Providers/NotificationProvider.jsx";
+
 export default function CustomersIndex() {
     const auth = usePage().props.auth;
+    const { success, error, warning, info } = useNotification();
 
     const [customers, setCustomers] = React.useState([]);
     const [page, setPage] = React.useState(1);
@@ -30,11 +33,18 @@ export default function CustomersIndex() {
 
     const handleSave = async (data) => {
         try {
-            const response = await createCustomer(data);
+            await createCustomer(data);
+            success("Cliente creado exitosamente");
             setCreateCustomerModal(false);
             fetchCustomers(); // Refresh the customer list
-        } catch (error) {
-            console.error("There was an error creating the customer!", error);
+        } catch (err) {
+            console.error("There was an error creating the customer!", err);
+            const errors = err.response?.data?.errors || {};
+            for (const [field, messages] of Object.entries(errors)) {
+                messages.forEach((message) => {
+                    error(message);
+                });
+            }
         }
     }
 
@@ -89,7 +99,7 @@ export default function CustomersIndex() {
             icon: ShoppingCart,
             onClick: (row) => router.visit(route("admin.sales.index")+`?search=${row.document_number}`),
         },
-        { divider: true },
+        /*{ divider: true },
         {
             key: "delete",
             label: "Eliminar",
@@ -100,7 +110,7 @@ export default function CustomersIndex() {
                 }
             },
             className: "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20",
-        },
+        },*/
     ];
 
     return (

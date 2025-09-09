@@ -5,6 +5,8 @@ import CategoryModal from "./CategoryModal.jsx";
 const ProductFormEdit = ({ onSubmit, initialData = null }) => {
     const [formData, setFormData] = useState({
         category_id: "",
+        brand_id: "",
+        measure_id: "",
         name: "",
         description: "",
         code: "",
@@ -13,8 +15,12 @@ const ProductFormEdit = ({ onSubmit, initialData = null }) => {
 
     const [prices, setPrices] = useState(initialData ? initialData.prices : []);
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [measures, setMeasures] = useState([]);
 
     const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [showBrandModal, setShowBrandModal] = useState(false);
+    const [showMeasureModal, setShowMeasureModal] = useState(false);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
@@ -25,6 +31,8 @@ const ProductFormEdit = ({ onSubmit, initialData = null }) => {
 
     useEffect(() => {
         fetchCategories();
+        fetchBrands();
+        fetchMeasures();
     }, []);
 
     const fetchCategories = () => {
@@ -35,6 +43,28 @@ const ProductFormEdit = ({ onSubmit, initialData = null }) => {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
+            });
+    };
+
+    const fetchBrands = () => {
+        let url = route("admin.products.brands.get") + "?isSelect=true";
+        axios.get(url)
+            .then((response) => {
+                setBrands(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching brands:", error);
+            });
+    };
+
+    const fetchMeasures = () => {
+        let url = route("admin.products.measures.get") + "?isSelect=true";
+        axios.get(url)
+            .then((response) => {
+                setMeasures(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching measures:", error);
             });
     };
 
@@ -86,6 +116,30 @@ const ProductFormEdit = ({ onSubmit, initialData = null }) => {
             });
     };
 
+    const handleAddBrand = (newBrand) => {
+        let url = route("admin.products.brands.store");
+        axios.post(url, newBrand)
+            .then((response) => {
+                fetchBrands();
+                setShowBrandModal(false);
+            })
+            .catch((error) => {
+                console.error("Error adding brand:", error);
+            });
+    };
+
+    const handleAddMeasure = (newMeasure) => {
+        let url = route("admin.products.measures.store");
+        axios.post(url, newMeasure)
+            .then((response) => {
+                fetchMeasures();
+                setShowMeasureModal(false);
+            })
+            .catch((error) => {
+                console.error("Error adding measure:", error);
+            });
+    };
+
     return (
         <>
             <div className="space-y-6">
@@ -126,6 +180,64 @@ const ProductFormEdit = ({ onSubmit, initialData = null }) => {
                         <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
                             <AlertCircle size={14} />
                             {errors.category_id}
+                        </p>
+                    )}
+                </div>
+
+                {/* Brand Selection */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Package className="inline w-4 h-4 mr-1" />
+                        Marca <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                        name="brand_id"
+                        value={formData.brand_id}
+                        onChange={handleChange}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors.brand_id ? "border-red-500" : "border-gray-300"
+                        }`}
+                    >
+                        <option value="">Selecciona una marca</option>
+                        {brands.map((brand) => (
+                            <option key={brand.id} value={brand.id}>
+                                {brand.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.brand_id && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle size={14} />
+                            {errors.brand_id}
+                        </p>
+                    )}
+                </div>
+
+                {/* Measure Selection */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Package className="inline w-4 h-4 mr-1" />
+                        Medida <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                        name="measure_id"
+                        value={formData.measure_id}
+                        onChange={handleChange}
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors.measure_id ? "border-red-500" : "border-gray-300"
+                        }`}
+                    >
+                        <option value="">Selecciona una medida</option>
+                        {measures.map((measure) => (
+                            <option key={measure.id} value={measure.id}>
+                                {measure.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.measure_id && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle size={14} />
+                            {errors.measure_id}
                         </p>
                     )}
                 </div>

@@ -21,9 +21,13 @@ import CustomerForm from "../../Customers/Components/CustomerForm.jsx";
 import { getProducts } from "@/Services/products.js";
 import { getCustomers, createCustomer } from "@/Services/customer.js";
 import { createSale } from "@/Services/sale.js";
+import { useNotification } from "@/Providers/NotificationProvider.jsx";
 
 // Main Sale Form Component
-const SaleForm = ({onSaleCreated}) => {
+const SaleForm = ({ onSaleCreated }) => {
+
+    const { success, error } = useNotification();
+
     // Products data
     const [products, setProducts] = useState([]);
 
@@ -164,6 +168,7 @@ const SaleForm = ({onSaleCreated}) => {
             setSelectedCustomer(newCustomer);
             setShowCustomerForm(false);
             setSearchCustomer("");
+            success("Cliente creado exitosamente");
         } catch (error) {
             console.error("Error creating customer:", error);
             alert("Error al crear el cliente. Por favor, inténtalo de nuevo.");
@@ -200,9 +205,15 @@ const SaleForm = ({onSaleCreated}) => {
         alert("¡Venta procesada exitosamente!");
         try {
             await createSale(saleData);
-        } catch (error) {
-            console.error("Error creating sale:", error);
-            alert("Error al procesar la venta. Por favor, inténtalo de nuevo.");
+            success("Venta creada exitosamente");
+        } catch (err) {
+            console.error("Error creating sale:", err);
+            const errors = err.response?.data?.errors || {};
+            for (const [field, messages] of Object.entries(errors)) {
+                messages.forEach((message) => {
+                    error(message);
+                });
+            }
             return;
         }
 

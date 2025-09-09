@@ -37,10 +37,28 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
+        
+        Schema::create('product_brands', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->comment('Name of the product brand');
+            $table->string('description')->nullable()->comment('Description of the product brand');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
+        Schema::create('product_measures', function (Blueprint $table) {
+            $table->id();
+            $table->string('name')->comment('Name of the product measure');
+            $table->string('description')->nullable()->comment('Description of the product measure');
+            $table->timestamps();
+            $table->softDeletes();
+        });
 
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('category_id')->nullable()->comment('ID of the product category');
+            $table->unsignedBigInteger('brand_id')->nullable()->comment('ID of the product brand');
+            $table->unsignedBigInteger('measure_id')->nullable()->comment('ID of the product measure');
             $table->string('name');
             $table->string('description')->nullable();
             $table->string('code')->unique();
@@ -51,6 +69,8 @@ return new class extends Migration
 
             // Foreign key constraint to ensure category exists
             $table->foreign('category_id')->references('id')->on('product_categories')->nullOnDelete();
+            $table->foreign('brand_id')->references('id')->on('product_brands')->nullOnDelete();
+            $table->foreign('measure_id')->references('id')->on('product_measures')->nullOnDelete();
             $table->index(['category_id'], 'product_category_index');
             $table->index(['name'], 'product_name_index');
             $table->index(['code'], 'product_code_index');

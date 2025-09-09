@@ -43,6 +43,7 @@ class ProductsController extends Controller
     {
         $products = \App\Models\Product::where('stock', '<=', \DB::raw('minimum_stock'))
             ->orderBy('id', 'desc')
+            ->limit(30)
             ->get(['id', 'name', 'stock', 'minimum_stock']);
         return response()->json($products);
     }
@@ -69,11 +70,16 @@ class ProductsController extends Controller
     {
         $data = $request->validate([
             'category_id' => 'nullable|exists:product_categories,id',
+            'brand_id' => 'nullable|exists:product_brands,id',
+            'measure_id' => 'nullable|exists:product_measures,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'code' => 'required|string|max:100|unique:products,code',
             'minimum_stock' => 'required|integer|min:0',
             'price' => 'required|numeric|min:0',
+        ],
+        [
+            'code.unique' => 'El código del producto ya está registrado.',
         ]);
 
         $product = \App\Models\Product::create($data);
@@ -94,6 +100,8 @@ class ProductsController extends Controller
 
         $data = $request->validate([
             'category_id' => 'nullable|exists:product_categories,id',
+            'brand_id' => 'nullable|exists:product_brands,id',
+            'measure_id' => 'nullable|exists:product_measures,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:500',
             'code' => 'required|string|max:100|unique:products,code,' . $id,

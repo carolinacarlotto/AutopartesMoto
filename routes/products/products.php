@@ -7,6 +7,8 @@ use App\Http\Controllers\Products\ProductsController;
 use App\Http\Controllers\Products\ProductPricesController;
 use App\Http\Controllers\Products\ProductMultimedia;
 use App\Http\Controllers\Products\ProductCategoriesController;
+use App\Http\Controllers\Products\ProductBrandController;
+use App\Http\Controllers\Products\ProductMeasureController;    
 use App\Http\Controllers\Products\ProductBatchesController;
 use App\Http\Controllers\Products\StockMovementsController;
 use App\Http\Controllers\Products\ProductTechnicalSpecification;
@@ -58,6 +60,22 @@ Route::group([
         Route::get('/', [ProductCategoriesController::class, 'index'])->name('index');
         Route::get('/get', [ProductCategoriesController::class, 'getCategories'])->name('get');
         Route::post('/store', [ProductCategoriesController::class, 'store'])->name('store');
+    });
+
+    Route::group([
+        'prefix' => 'brands',
+        'as' => 'brands.',
+    ], function () {
+        Route::get('/get', [ProductBrandController::class, 'getBrands'])->name('get');
+        Route::post('/store', [ProductBrandController::class, 'store'])->name('store');
+    });
+
+    Route::group([
+        'prefix' => 'measures',
+        'as' => 'measures.',
+    ], function () {
+        Route::get('/get', [ProductMeasureController::class, 'getMeasures'])->name('get');
+        Route::post('/store', [ProductMeasureController::class, 'store'])->name('store');
     });
 
     Route::group([

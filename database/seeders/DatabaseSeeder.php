@@ -23,9 +23,9 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => bcrypt('password'), // Ensure to hash the password
+            'name' => 'Mi usuario',
+            'email' => 'usuario@example.com',
+            'password' => bcrypt('usuario!2025'), // Ensure to hash the password
             'email_verified_at' => now(), // Set email verification date
         ])->assignRole('admin'); // Assign the admin role to the user
 
@@ -42,7 +42,8 @@ class DatabaseSeeder extends Seeder
             'address' => '',
         ]);
 
-        // Call the TestDataSeeder to populate the database with test data
-        //$this->call(TestDataSeeder::class);
+        $this->call([
+            ProductsSeeder::class,
+        ]);
     }
 }

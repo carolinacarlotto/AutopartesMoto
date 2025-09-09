@@ -5,7 +5,7 @@ import { Package, Hash, Calendar, DollarSign, Truck, FileText, AlertCircle } fro
 const BatchForm = ({ onSubmit, initialData = null, product = null }) => {
     const [formData, setFormData] = useState({
         product_id: product ? product.id : "",
-        batch_number: "",
+        //batch_number: "",
         manufacture_date: "",
         expiry_date: "",
         quantity_received: "",
@@ -63,8 +63,8 @@ const BatchForm = ({ onSubmit, initialData = null, product = null }) => {
     const validateForm = () => {
         const newErrors = {};
 
-        if (!formData.batch_number.trim())
-            newErrors.batch_number = "El número de lote es requerido";
+        /*if (!formData.batch_number.trim())
+            newErrors.batch_number = "El número de lote es requerido";*/
         if (!formData.quantity_received || formData.quantity_received <= 0)
             newErrors.quantity_received = "La cantidad debe ser mayor a 0";
         if (!formData.purchase_price || formData.purchase_price < 0)
@@ -123,7 +123,7 @@ const BatchForm = ({ onSubmit, initialData = null, product = null }) => {
                 </div>
 
                 {/* Batch Number */}
-                <div>
+                {/*<div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                         <Hash className="inline w-4 h-4 mr-1" />
                         Número de Lote <span className="text-red-500">*</span>
@@ -146,7 +146,7 @@ const BatchForm = ({ onSubmit, initialData = null, product = null }) => {
                             {errors.batch_number}
                         </p>
                     )}
-                </div>
+                </div>*/}
 
                 {/* Dates */}
                 <div className="grid grid-cols-2 gap-4">
@@ -415,7 +415,7 @@ const BatchForm = ({ onSubmit, initialData = null, product = null }) => {
                         onClick={() =>
                             setFormData({
                                 product_id: "",
-                                batch_number: "",
+                                //batch_number: "",
                                 manufacture_date: "",
                                 expiry_date: "",
                                 quantity_received: "",

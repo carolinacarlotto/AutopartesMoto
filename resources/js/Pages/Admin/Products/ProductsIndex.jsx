@@ -22,7 +22,7 @@ import ProductFormEdit from './Components/ProductFormEdit.jsx';
 import ProductPricesForm from './Components/ProductPricesForm.jsx';
 import BatchForm from './Components/BatchForm.jsx';
 import Inventory from './Components/Inventory.jsx';
-import TopSellingProduct from './Components/TopSellingProduct.jsx';
+//import TopSellingProduct from './Components/TopSellingProduct.jsx';
 import ProductMultimedia from './Components/ProductMultimedia.jsx';
 import ProductTechnicalSpecifications from './Components/ProductTechnicalSpecifications.jsx';
 import ProductSheet from './Components/ProductSheet.jsx';
@@ -61,19 +61,25 @@ export default function ProductsIndex() {
     const handleSubmitCreateProduct = (data) => {
         axios.post(route('admin.products.store'), data)
             .then(response => {
-                console.log('guardado');
                 success("Producto creado exitosamente");
                 setCreateProductModal(false);
                 getProducts(); // Refresh the product list
             })
-            .catch(error => {
-                console.error("There was an error creating the product!", error);
+            .catch(err => {
+                console.error("There was an error creating the product!", err);
+                const errors = err.response?.data?.errors || {};
+                for (const [field, messages] of Object.entries(errors)) {
+                    messages.forEach((message) => {
+                        error(message);
+                    });
+                }
             });
     }
 
     const handleSubmitEditProduct = (data) => {
         axios.put(route('admin.products.update', { id: selectedProduct.id }), data)
             .then(response => {
+                success("Producto actualizado exitosamente");
                 setEditProductModal(false);
                 getProducts(); // Refresh the product list
             })
@@ -179,6 +185,8 @@ export default function ProductsIndex() {
             ),
         },
         { key: "category_name", label: "Categoría" },
+        { key: "brand_name", label: "Marca" },
+        { key: "measure_name", label: "Medida" },
         { key: "stock", label: "Stock" },
         { key: "minimum_stock", label: "Stock Mínimo" },
         {
@@ -248,7 +256,7 @@ export default function ProductsIndex() {
             },
             //show: (row) => row.activo, // Solo mostrar si está activo
         },
-        { divider: true },
+        /*{ divider: true },
         {
             key: "delete",
             label: "Eliminar",
@@ -259,7 +267,7 @@ export default function ProductsIndex() {
                 }
             },
             className: "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20",
-        },
+        },*/
     ];
     
     return (

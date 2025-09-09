@@ -51,7 +51,7 @@ class ProductBatchesController extends Controller
     {
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
-            'batch_number' => 'required|string|max:255',
+            //'batch_number' => 'required|string|max:255',
             'manufacture_date' => 'nullable|date',
             'expiry_date' => 'nullable|date|after:manufacture_date',
             'quantity_received' => 'required|integer|min:1',
@@ -63,6 +63,9 @@ class ProductBatchesController extends Controller
         // Create the product batch, add quantity_available and quantity_received
         $validated['quantity_available'] = $validated['quantity_received']; // Initially, all received stock is available
         $validated['user_id'] = auth()->id(); // Assuming you want to track the user who created the batch
+        $countBatches = ProductBatch::where('product_id', $validated['product_id'])->count();
+        $validated['batch_number'] = "LOTE-{$validated['product_id']}-" . str_pad($countBatches + 1, 5, '0', STR_PAD_LEFT);
+
         $batch = ProductBatch::create($validated);
 
         $stockMovement = StockMovement::create([

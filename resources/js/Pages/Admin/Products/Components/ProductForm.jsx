@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { Tag, Package, Hash, Archive, Plus, AlertCircle } from "lucide-react";
+import { Tag, Package, Hash, Archive, Plus, AlertCircle, Ruler } from "lucide-react";
 import CategoryModal from "./CategoryModal.jsx";
+import BrandModal from "./BrandModal.jsx";
+import MeasureModal from "./MeasureModal.jsx";
 
 const ProductForm = ({ onSubmit, initialData = null }) => {
     const [formData, setFormData] = useState({
         category_id: "",
+        brand_id: "",
+        measure_id: "",
         name: "",
         description: "",
         code: "",
@@ -13,8 +17,12 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
     });
 
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
+    const [measures, setMeasures] = useState([]);
 
     const [showCategoryModal, setShowCategoryModal] = useState(false);
+    const [showBrandModal, setShowBrandModal] = useState(false);
+    const [showMeasureModal, setShowMeasureModal] = useState(false);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
@@ -25,6 +33,8 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
 
     useEffect(() => {
         fetchCategories();
+        fetchBrands();
+        fetchMeasures();
     }, []);
 
     const fetchCategories = () => {
@@ -35,6 +45,28 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
             })
             .catch((error) => {
                 console.error("Error fetching categories:", error);
+            });
+    };
+
+    const fetchBrands = () => {
+        let url = route("admin.products.brands.get") + "?isSelect=true";
+        axios.get(url)
+            .then((response) => {
+                setBrands(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching brands:", error);
+            });
+    };
+
+    const fetchMeasures = () => {
+        let url = route("admin.products.measures.get") + "?isSelect=true";
+        axios.get(url)
+            .then((response) => {
+                setMeasures(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching measures:", error);
             });
     };
 
@@ -77,11 +109,6 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
     };
 
     const handleAddCategory = (newCategory) => {
-        /*setCategories((prev) => [...prev, newCategory]);
-        setFormData((prev) => ({
-            ...prev,
-            category_id: newCategory.id.toString(),
-        }));*/
         let url = route("admin.products.categories.store");
         axios.post(url, newCategory)
             .then((response) => {
@@ -90,6 +117,30 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
             })
             .catch((error) => {
                 console.error("Error adding category:", error);
+            });
+    };
+
+    const handleAddMeasure = (newMeasure) => {
+        let url = route("admin.products.measures.store");
+        axios.post(url, newMeasure)
+            .then((response) => {
+                fetchMeasures();
+                setShowMeasureModal(false);
+            })
+            .catch((error) => {
+                console.error("Error adding measure:", error);
+            });
+    };
+
+    const handleAddBrand = (newBrand) => {
+        let url = route("admin.products.brands.store");
+        axios.post(url, newBrand)
+            .then((response) => {
+                fetchBrands();
+                setShowBrandModal(false);
+            })
+            .catch((error) => {
+                console.error("Error adding brand:", error);
             });
     };
 
@@ -136,6 +187,88 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
                         </p>
                     )}
                 </div>
+
+                <div>
+                    {/* Brand Selection */}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Tag className="inline w-4 h-4 mr-1" />
+                        Marca
+                    </label>
+                    <div className="flex gap-2">
+                        <select
+                            name="brand_id"
+                            value={formData.brand_id}
+                            onChange={handleChange}
+                            className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                errors.brand_id
+                                    ? "border-red-500"
+                                    : "border-gray-300"
+                            }`}
+                        >
+                            <option value="">Selecciona una marca</option>
+                            {brands.map((brand) => (
+                                <option key={brand.id} value={brand.id}>
+                                    {brand.name}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            onClick={() => setShowBrandModal(true)}
+                            className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
+                        >
+                            <Plus size={16} />
+                            Nueva
+                        </button>
+                    </div>
+                    {errors.brand_id && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle size={14} />
+                            {errors.brand_id}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <Ruler className="inline w-4 h-4 mr-1" />
+                        Medida
+                    </label>
+                    <div className="flex gap-2">
+                        <select
+                            name="measure_id"
+                            value={formData.measure_id}
+                            onChange={handleChange}
+                            className={`flex-1 px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                errors.measure_id
+                                    ? "border-red-500"
+                                    : "border-gray-300"
+                            }`}
+                        >
+                            <option value="">Selecciona una medida</option>
+                            {measures.map((measure) => (
+                                <option key={measure.id} value={measure.id}>
+                                    {measure.name}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            onClick={() => setShowMeasureModal(true)}
+                            className="px-3 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center gap-1"
+                        >
+                            <Plus size={16} />
+                            Nueva
+                        </button>
+                    </div>
+                    {errors.measure_id && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle size={14} />
+                            {errors.measure_id}
+                        </p>
+                    )}
+                </div>
+
 
                 {/* Product Name */}
                 <div>
@@ -301,6 +434,20 @@ const ProductForm = ({ onSubmit, initialData = null }) => {
                 isOpen={showCategoryModal}
                 onClose={() => setShowCategoryModal(false)}
                 onSave={handleAddCategory}
+            />
+
+            {/* Brand Modal */}
+            <BrandModal
+                isOpen={showBrandModal}
+                onClose={() => setShowBrandModal(false)}
+                onSave={handleAddBrand}
+            />
+
+            {/* Measure Modal */}
+            <MeasureModal
+                isOpen={showMeasureModal}
+                onClose={() => setShowMeasureModal(false)}
+                onSave={handleAddMeasure}
             />
         </>
     );

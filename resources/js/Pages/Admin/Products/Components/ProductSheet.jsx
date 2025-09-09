@@ -226,6 +226,22 @@ const ProductSheet = ({ product }) => {
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-600">
+                                    Marca
+                                </label>
+                                <p className="text-gray-900 font-medium">
+                                    {product.brand_name || "Sin marca"}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">
+                                    Medida
+                                </label>
+                                <p className="text-gray-900 font-medium">
+                                    {product.measure_name || "Sin medida"}
+                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-600">
                                     Stock Actual
                                 </label>
                                 <p className="text-gray-900 font-medium">
