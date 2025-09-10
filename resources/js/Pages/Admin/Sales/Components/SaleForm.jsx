@@ -25,14 +25,13 @@ import { useNotification } from "@/Providers/NotificationProvider.jsx";
 
 // Main Sale Form Component
 const SaleForm = ({ onSaleCreated }) => {
-
-    const { success, error } = useNotification();
+    const { success, error, warning, info } = useNotification();
 
     // Products data
     const [products, setProducts] = useState([]);
 
     // Customers data
-    const [customers, setCustomers] = useState  ([]);
+    const [customers, setCustomers] = useState([]);
 
     // States
     const [searchProduct, setSearchProduct] = useState("");
@@ -44,25 +43,31 @@ const SaleForm = ({ onSaleCreated }) => {
     const [paymentMethod, setPaymentMethod] = useState("cash");
     const [discount, setDiscount] = useState(0);
 
+    const [loadingProducts, setLoadingProducts] = useState(false);
+    const [loadingCustomers, setLoadingCustomers] = useState(false);
 
     // Fetch products from the service
     const fetchProducts = async () => {
         try {
-            const data = await getProducts({all: true});
+            setLoadingProducts(true);
+            const data = await getProducts({ all: true });
             setProducts(data || []);
         } catch (error) {
             console.error("Error fetching products:", error);
-        }
+        } 
+        setLoadingProducts(false);
     };
 
     // Fetch customers from the service
     const fetchCustomers = async () => {
         try {
-            const data = await getCustomers({all: true});
+            setLoadingCustomers(true);
+            const data = await getCustomers({ all: true });
             setCustomers(data || []);
         } catch (error) {
             console.error("Error fetching customers:", error);
         }
+        setLoadingCustomers(false);
     };
 
     useEffect(() => {
@@ -75,7 +80,9 @@ const SaleForm = ({ onSaleCreated }) => {
         (product) =>
             product.name.toLowerCase().includes(searchProduct.toLowerCase()) ||
             product.code.toLowerCase().includes(searchProduct.toLowerCase()) ||
-            product.category.toLowerCase().includes(searchProduct.toLowerCase())
+            product.category_name
+                .toLowerCase()
+                .includes(searchProduct.toLowerCase())
     );
 
     // Filter customers based on search
@@ -111,7 +118,7 @@ const SaleForm = ({ onSaleCreated }) => {
                     )
                 );
             } else {
-                alert("No hay suficiente stock disponible");
+                warning("No hay suficiente stock disponible");
             }
         } else {
             setCart([...cart, { ...product, quantity: 1 }]);
@@ -133,7 +140,7 @@ const SaleForm = ({ onSaleCreated }) => {
                 )
             );
         } else {
-            alert("No hay suficiente stock disponible");
+            warning("No hay suficiente stock disponible");
         }
     };
 
@@ -161,7 +168,7 @@ const SaleForm = ({ onSaleCreated }) => {
     const subtotal = total - discountAmount - tax;
 
     // Handle new customer
-    const handleNewCustomer = async(customerData) => {
+    const handleNewCustomer = async (customerData) => {
         try {
             const newCustomer = await createCustomer(customerData);
             setCustomers([...customers, newCustomer]);
@@ -171,19 +178,24 @@ const SaleForm = ({ onSaleCreated }) => {
             success("Cliente creado exitosamente");
         } catch (error) {
             console.error("Error creating customer:", error);
-            alert("Error al crear el cliente. Por favor, inténtalo de nuevo.");
+            const errors = error.response?.data?.errors || {};
+            for (const [field, messages] of Object.entries(errors)) {
+                messages.forEach((message) => {
+                    error(message);
+                });
+            }
         }
     };
 
     // Process sale
     const processSale = async () => {
         if (!selectedCustomer) {
-            alert("Por favor selecciona un cliente");
+            warning("Por favor selecciona un cliente");
             return;
         }
 
         if (cart.length === 0) {
-            alert("El carrito está vacío");
+            warning("El carrito está vacío");
             return;
         }
 
@@ -200,9 +212,8 @@ const SaleForm = ({ onSaleCreated }) => {
             date: new Date().toISOString(),
         };
 
-        console.log("Sale processed:", saleData);
+        //console.log("Sale processed:", saleData);
 
-        alert("¡Venta procesada exitosamente!");
         try {
             await createSale(saleData);
             success("Venta creada exitosamente");
@@ -233,13 +244,13 @@ const SaleForm = ({ onSaleCreated }) => {
     // Handle PDF generation (mock function)
     const handleGeneratePDF = () => {
         if (cart.length === 0) {
-            alert("El carrito está vacío, no se puede generar el PDF")
+            warning("El carrito está vacío, no se puede generar el PDF");
             return;
         }
         // Here you would implement the logic to generate a PDF
         console.log("Generating PDF...:", cart);
         generatePDF();
-    }
+    };
 
     /*const generatePDF = () => {
         const content = `
@@ -349,7 +360,9 @@ const SaleForm = ({ onSaleCreated }) => {
               }</p>
               <p><strong>${getDocumentTypeLabel(
                   selectedCustomer ? selectedCustomer.document_type : "Otro"
-              )}:</strong> ${selectedCustomer?.document_number || "No especificado"}</p>
+              )}:</strong> ${
+            selectedCustomer?.document_number || "No especificado"
+        }</p>
               <p><strong>Contacto:</strong> ${
                   selectedCustomer?.contact_name || "No especificado"
               }</p>
@@ -461,6 +474,21 @@ const SaleForm = ({ onSaleCreated }) => {
 
                             {/* Products Grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                                {loadingProducts && (
+                                    <div className="col-span-2 text-center py-4">
+                                        <AlertCircle className="mx-auto text-gray-300 mb-2" size={48} />
+                                        <p className="text-gray-500">Cargando productos...</p>
+                                    </div>
+                                )}
+
+
+                                {!loadingProducts && filteredProducts.length === 0 && (
+                                    <div className="col-span-2 text-center py-4">
+                                        <AlertCircle className="mx-auto text-gray-300 mb-2" size={48} />
+                                        <p className="text-gray-500">No se encontraron productos.</p>
+                                    </div>
+                                )}
+
                                 {filteredProducts.map((product) => (
                                     <div
                                         key={product.id}
@@ -475,7 +503,8 @@ const SaleForm = ({ onSaleCreated }) => {
                                                     {product.code}
                                                 </p>
                                                 <p className="text-xs text-gray-400">
-                                                    {product.category_name || "Sin categoría"}
+                                                    {product.category_name ||
+                                                        "Sin categoría"}
                                                 </p>
                                             </div>
                                             <p className="text-lg font-bold text-blue-600">
@@ -858,10 +887,17 @@ const SaleForm = ({ onSaleCreated }) => {
                 title="Registrar Nuevo Cliente"
                 size="medium"
             >
-                <CustomerForm
-                    onSave={handleNewCustomer}
-                    onCancel={() => setShowCustomerForm(false)}
-                />
+                <div
+                    style={{
+                        maxHeight: "calc(100vh - 200px)",
+                        overflowY: "auto",
+                    }}
+                >
+                    <CustomerForm
+                        onSave={handleNewCustomer}
+                        onCancel={() => setShowCustomerForm(false)}
+                    />
+                </div>
             </Modal>
 
             {/* Checkout Modal */}
@@ -871,54 +907,68 @@ const SaleForm = ({ onSaleCreated }) => {
                 title="Confirmar Venta"
                 size="medium"
             >
-                <div className="space-y-4">
-                    <div className="bg-gray-50 rounded-lg p-4">
-                        <h3 className="font-semibold mb-2">Resumen de Venta</h3>
-                        <p className="text-sm text-gray-600">
-                            Cliente: {selectedCustomer?.name}
-                            {selectedCustomer?.type === "business" &&
-                                selectedCustomer?.contact_name &&
-                                ` (${selectedCustomer.contact_name})`}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            Items:{" "}
-                            {cart.reduce((acc, item) => acc + item.quantity, 0)}
-                        </p>
-                        <p className="text-lg font-bold text-blue-600 mt-2">
-                            Total: S/. {total.toFixed(2)}
-                        </p>
-                    </div>
+                <div
+                    style={{
+                        maxHeight: "calc(100vh - 200px)",
+                        overflowY: "auto",
+                    }}
+                >
+                    <div className="space-y-4">
+                        <div className="bg-gray-50 rounded-lg p-4">
+                            <h3 className="font-semibold mb-2">
+                                Resumen de Venta
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                                Cliente: {selectedCustomer?.name}
+                                {selectedCustomer?.type === "business" &&
+                                    selectedCustomer?.contact_name &&
+                                    ` (${selectedCustomer.contact_name})`}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                                Items:{" "}
+                                {cart.reduce(
+                                    (acc, item) => acc + item.quantity,
+                                    0
+                                )}
+                            </p>
+                            <p className="text-lg font-bold text-blue-600 mt-2">
+                                Total: S/. {total.toFixed(2)}
+                            </p>
+                        </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Método de Pago
-                        </label>
-                        <select
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                        >
-                            <option value="cash">Efectivo</option>
-                            <option value="card">Tarjeta</option>
-                            <option value="transfer">Transferencia</option>
-                            <option value="other">Otro</option>
-                        </select>
-                    </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Método de Pago
+                            </label>
+                            <select
+                                value={paymentMethod}
+                                onChange={(e) =>
+                                    setPaymentMethod(e.target.value)
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                            >
+                                <option value="cash">Efectivo</option>
+                                <option value="card">Tarjeta</option>
+                                <option value="transfer">Transferencia</option>
+                                <option value="other">Otro</option>
+                            </select>
+                        </div>
 
-                    <div className="flex gap-3 justify-end pt-4 border-t">
-                        <button
-                            onClick={() => setShowCheckout(false)}
-                            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            onClick={processSale}
-                            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center gap-2"
-                        >
-                            <Check size={20} />
-                            Confirmar Venta
-                        </button>
+                        <div className="flex gap-3 justify-end pt-4 border-t">
+                            <button
+                                onClick={() => setShowCheckout(false)}
+                                className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={processSale}
+                                className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors flex items-center gap-2"
+                            >
+                                <Check size={20} />
+                                Confirmar Venta
+                            </button>
+                        </div>
                     </div>
                 </div>
             </Modal>

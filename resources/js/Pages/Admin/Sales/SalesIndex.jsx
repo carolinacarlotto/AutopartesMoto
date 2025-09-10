@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { Eye, FlipHorizontal2, Trash2 } from 'lucide-react';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { usePage } from "@inertiajs/react";
+import { Eye, FlipHorizontal2, Trash2 } from "lucide-react";
+import axios from "axios";
 
-import AdminLayout from '../../../Layouts/AdminLayout/AdminLayout.jsx';
-import DynamicTable from '../../../Components/Tables/DynamicTable.jsx';
-import Modal from '../../../Components/Modals/Modal.jsx';
-import SaleForm from './Components/SaleForm.jsx';
-import SaleInvoice from './Components/SaleInvoice.jsx';
-import SalesCard from './Components/SalesCard.jsx';
+import AdminLayout from "../../../Layouts/AdminLayout/AdminLayout.jsx";
+import DynamicTable from "../../../Components/Tables/DynamicTable.jsx";
+import Modal from "../../../Components/Modals/Modal.jsx";
+import SaleForm from "./Components/SaleForm.jsx";
+import SaleInvoice from "./Components/SaleInvoice.jsx";
+import SalesCard from "./Components/SalesCard.jsx";
 
 import { getSales, getSale, getSalesAnalytics } from "@/Services/sale.js";
 
@@ -28,7 +28,6 @@ export default function SalesIndex() {
     const [createProductModal, setCreateProductModal] = useState(false);
     const [viewSaleModal, setViewSaleModal] = useState(false);
 
-
     const fetchSales = async () => {
         try {
             const data = await getSales({
@@ -42,7 +41,7 @@ export default function SalesIndex() {
         } catch (error) {
             console.error("Error fetching sales:", error);
         }
-    }
+    };
 
     const fetchSaleDetails = async (id) => {
         try {
@@ -53,11 +52,12 @@ export default function SalesIndex() {
             setViewSaleModal(false);
             console.error("Error fetching sale details:", error);
         }
-    }
+    };
 
     const fetchSaleAnalytics = async (startDate, endDate) => {
         try {
-            const params = { //25-07-2024 00:00 to 01-08-2024 00:00
+            const params = {
+                //25-07-2024 00:00 to 01-08-2024 00:00
                 start_date: startDate,
                 end_date: endDate,
             }; // Add any parameters if needed
@@ -66,7 +66,7 @@ export default function SalesIndex() {
         } catch (error) {
             console.error("Error fetching sales analytics:", error);
         }
-    }
+    };
 
     const onDateRangeChange = (startDate, endDate) => {
         console.log("Selected date range:", startDate, endDate);
@@ -82,7 +82,7 @@ export default function SalesIndex() {
         }
 
         fetchSaleAnalytics(startDate, endDate);
-    }
+    };
 
     useEffect(() => {
         fetchSales();
@@ -106,11 +106,13 @@ export default function SalesIndex() {
                     {value ? (
                         <>
                             <p className="m-0">{value.name}</p>
-                            <p className="m-0">{value.document_type}: {value.document_number}</p>
-                            { value.type === "business" && (
+                            <p className="m-0">
+                                {value.document_type}: {value.document_number}
+                            </p>
+                            {value.type === "business" && (
                                 <p className="m-0">Empresa</p>
                             )}
-                            { value.type === "individual" && (
+                            {value.type === "individual" && (
                                 <p className="m-0">Persona</p>
                             )}
                         </>
@@ -144,7 +146,11 @@ export default function SalesIndex() {
             key: "document_number",
             label: "Número de Documento",
         },
-        { key: "total", label: "Total", render: (value) => formatCurrency(value) },
+        {
+            key: "total",
+            label: "Total",
+            render: (value) => formatCurrency(value),
+        },
     ];
 
     const actions = [
@@ -174,7 +180,6 @@ export default function SalesIndex() {
             className: "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20",
         },
     ];
-
 
     return (
         <AdminLayout auth={auth}>
@@ -233,7 +238,8 @@ export default function SalesIndex() {
                 >
                     <SaleForm
                         onSaleCreated={(saleData) => {
-                            window.location.reload();
+                            fetchSales();
+                            setCreateProductModal(false);
                         }}
                     />
                 </div>
@@ -245,11 +251,18 @@ export default function SalesIndex() {
                 title="Detalles de la Venta"
                 size="xlarge"
             >
-                {saleDetails ? (
-                    <SaleInvoice saleData={saleDetails} />
-                ) : (
-                    <p>Cargando detalles de la venta...</p>
-                )}
+                <div
+                    style={{
+                        maxHeight: "calc(100vh - 200px)",
+                        overflowY: "auto",
+                    }}
+                >
+                    {saleDetails ? (
+                        <SaleInvoice saleData={saleDetails} />
+                    ) : (
+                        <p>Cargando detalles de la venta...</p>
+                    )}
+                </div>
             </Modal>
         </AdminLayout>
     );

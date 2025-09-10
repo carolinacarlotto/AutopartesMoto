@@ -423,10 +423,17 @@ export default function ProductsIndex() {
                 size="large"
                 closeOnOverlay={false}
             >
-                <BatchForm
-                    onSubmit={handleSubmitCreateBatch}
-                    product={selectedProduct}
-                />
+                <div
+                    style={{
+                        maxHeight: "calc(100vh - 200px)",
+                        overflowY: "auto",
+                    }}
+                >
+                    <BatchForm
+                        onSubmit={handleSubmitCreateBatch}
+                        product={selectedProduct}
+                    />
+                </div>
             </Modal>
 
             {/* Modal to view inventory */}

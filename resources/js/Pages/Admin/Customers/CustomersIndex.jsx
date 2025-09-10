@@ -1,20 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { router, usePage } from "@inertiajs/react";
-import {
-    Edit,
-    Trash2,
-    ShoppingCart
-} from "lucide-react";
+import { Edit, Trash2, ShoppingCart } from "lucide-react";
 
 import AdminLayout from "../../../Layouts/AdminLayout/AdminLayout.jsx";
 import DynamicTable from "../../../Components/Tables/DynamicTable.jsx";
 import Modal from "../../../Components/Modals/Modal.jsx";
 import CustomerForm from "./Components/CustomerForm.jsx";
 
-import {
-    getCustomers,
-    createCustomer,
-} from "@/Services/customer.js";
+import { getCustomers, createCustomer } from "@/Services/customer.js";
 
 import { useNotification } from "@/Providers/NotificationProvider.jsx";
 
@@ -46,7 +39,7 @@ export default function CustomersIndex() {
                 });
             }
         }
-    }
+    };
 
     const fetchCustomers = async () => {
         try {
@@ -79,7 +72,8 @@ export default function CustomersIndex() {
             render: (value, row) => (
                 <>
                     <p className="m-0">
-                        {row.document_type || "N/A"}: {row.document_number || "N/A"}
+                        {row.document_type || "N/A"}:{" "}
+                        {row.document_number || "N/A"}
                     </p>
                 </>
             ),
@@ -97,7 +91,11 @@ export default function CustomersIndex() {
             key: "sales",
             label: "Ventas",
             icon: ShoppingCart,
-            onClick: (row) => router.visit(route("admin.sales.index")+`?search=${row.document_number}`),
+            onClick: (row) =>
+                router.visit(
+                    route("admin.sales.index") +
+                        `?search=${row.document_number}`
+                ),
         },
         /*{ divider: true },
         {
@@ -153,10 +151,17 @@ export default function CustomersIndex() {
                 size="large"
                 closeOnOverlay={false}
             >
-                <CustomerForm
-                    onSave={handleSave}
-                    onCancel={() => setCreateCustomerModal(false)}
-                />
+                <div
+                    style={{
+                        maxHeight: "calc(100vh - 200px)",
+                        overflowY: "auto",
+                    }}
+                >
+                    <CustomerForm
+                        onSave={handleSave}
+                        onCancel={() => setCreateCustomerModal(false)}
+                    />
+                </div>
             </Modal>
         </AdminLayout>
     );
