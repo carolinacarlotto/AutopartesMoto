@@ -61,7 +61,7 @@ const Navbar = ({ toggleSidebar, isSidebarExpanded }) => {
                         </button>
                         <div className="flex-shrink-0 flex items-center ml-4">
                             <h1 className="text-2xl font-bold text-indigo-600">
-                                {settings?.app_name || 'Mi Aplicación'}
+                                {settings?.app_name || 'Auto Partes'}
                             </h1>
                         </div>
                     </div>

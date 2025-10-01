@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Mi usuario',
-            'email' => 'usuario@example.com',
-            'password' => bcrypt('usuario!2025'), // Ensure to hash the password
+            'email' => 'ventas@autopartes.rl',
+            'password' => bcrypt('usuario2025!'), // Ensure to hash the password
             'email_verified_at' => now(), // Set email verification date
         ])->assignRole('admin'); // Assign the admin role to the user
 
@@ -42,8 +42,17 @@ class DatabaseSeeder extends Seeder
             'address' => '',
         ]);
 
+        \App\Models\Tax::insert([
+            'rate' => 18.0000, // 18%
+            'active' => true,
+            'start_date' => \Carbon\Carbon::now()->startOfYear(),
+            'end_date' => null
+        ]);
+
         $this->call([
+            CustomersSeeder::class,
             ProductsSeeder::class,
+            SalesSeeder::class,
         ]);
     }
 }

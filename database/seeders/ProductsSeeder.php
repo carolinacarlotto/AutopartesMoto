@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,30 @@ class ProductsSeeder extends Seeder
      */
     public function run(): void
     {
+        $suppliers = [
+            "B . J . R . SELVA S . A . C . (20601638143)",
+            "CASA DE LA BICICLETA E.I.R.L. (20309418027)",
+            "CASA DEL REPUESTO S.A.C. (20283394370)",
+            "CHINA YANG ZU S.A.C. (20392656562)",
+            "CORPORACION BJR IMPORT SUR S.A.C. (20536579746)",
+            "CORPORACION CAYMAN S.A.C. (20493190611)",
+            "GRUPO DELTA SELVA S.A.C. (20603603223)",
+            "HAOJIN SELVA S.A.C. (20612922722)",
+            "LUBRICANTES DE ALTURA S.A.C. (20496651481)",
+            "MADESEL S.A.C. (20393093782)",
+            "MOTO REPUESTOS & AB SOC. ANONIMA CERRADA (20441097604)",
+            "NOR OIL SAC (20480880154)",
+            "ORIENTE IMPORT DEL PERU S.R.L. (20101453414)",
+            "REPRESENTACIONES TECNIMOTORS E.I.R.L. (20100990998)",
+            "REPUESTOS new LID S.R.L. (20479378763)",
+            "SOCOPUR S.A.C. (20128967606)",
+            "SUMINISTROS DEL ORIENTE S.R.L. (20404493885)",
+            "SUSY IMPORT E.I.R.L. (20393997681)",
+            "TOTAL IMPORT & EXPORT S.R.L. (20393377381)",
+            "VISTONY COMPAÑIA INDUSTRIAL DEL PERU SOCIEDAD ANONIMA CERRADA (20102306598)",
+            "VOLDA ORIENTE S.A.C. (20611786922)"
+        ];
+
         $products = [
             [
                 'code' => 'CH274',
@@ -3584,20 +3609,69 @@ class ProductsSeeder extends Seeder
             $brand = \App\Models\ProductBrand::firstOrCreate(['name' => $product['brand']]);
             $unit = \App\Models\ProductMeasure::firstOrCreate(['name' => $product['unid']]);
 
+            // created_at and updated_at set start current year
+            $now = \Carbon\Carbon::now();
+            $startOfYear = $now->copy()->startOfYear();
+
             $savedProduct = \App\Models\Product::create([
                 'code' => $product['code'],
                 'name' => $product['name'],
                 'stock' => 0,
                 'category_id' => $category->id,
                 'brand_id' => $brand->id,
-                'measure_id' => $unit->id
+                'measure_id' => $unit->id,
+                'created_at' => $startOfYear,
+                'updated_at' => $startOfYear,
             ]);
 
             \App\Models\ProductPrice::create([
                 'product_id' => $savedProduct->id,
                 'price' => $product['price'],
-                'active' => true
+                'active' => true,
+                'created_at' => $startOfYear,
+                'updated_at' => $startOfYear,
             ]);
+
+            // MOVIMIENTOS DE INVENTARIO INICIALES
+            // random quantity between 5 and 20
+            $quantity = rand(5, 20);
+            $batchNumber = "LOTE-{$savedProduct->id}-" . str_pad(1, 5, '0', STR_PAD_LEFT);
+            
+            $randomSupplier = array_rand(array_flip($suppliers));
+
+            $batch = \App\Models\ProductBatch::create([
+                'product_id' => $savedProduct->id,
+                'supplier' => $randomSupplier,
+                'batch_number' => $batchNumber,
+                'quantity_received' => $quantity,
+                'quantity_available' => $quantity,
+                'user_id' => 1,
+                'purchase_price' => $product['price'] * 0.5, // assuming purchase price is 60% of sale price
+                'created_at' => $startOfYear,
+                'updated_at' => $startOfYear,
+            ]);
+
+            \App\Models\StockMovement::create([
+                'product_id' => $batch->product_id,
+                'product_batch_id' => $batch->id,
+                'quantity' => $batch->quantity_received,
+                'type' => 'income', // Assuming 'income' for received stock
+                'description' => "Received batch {$batch->batch_number} from supplier '{$batch->supplier}'",
+                'purchase_price' => $batch->purchase_price,
+                'total_purchase_price' => $batch->quantity_received * $batch->purchase_price,
+                'model_type' => \App\Models\ProductBatch::class,
+                'model_id' => $batch->id,
+                'user_id' => null,
+                'movement_date' => $startOfYear,
+                'created_at' => $startOfYear,
+                'updated_at' => $startOfYear,
+            ]);
+
+            // Update the product stock
+            $savedProduct->stock += $batch->quantity_received;
+            $savedProduct->save();
+
+
         }
     }
 }

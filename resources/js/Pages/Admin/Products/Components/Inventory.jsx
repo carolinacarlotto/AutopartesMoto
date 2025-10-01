@@ -110,6 +110,10 @@ const Inventory = ({ _movements, product = null }) => {
         return `s/.${parseFloat(amount).toFixed(2)}`;
     };
 
+    const formatCurrency2 = (amount) => {
+        return parseFloat(amount).toFixed(2);
+    };
+
     const handlePrint = () => {
         window.print();
     };
@@ -133,11 +137,13 @@ const Inventory = ({ _movements, product = null }) => {
             m.product.code,
             m.product_batch.batch_number,
             m.quantity,
-            formatCurrency(m.purchase_price),
-            m.type === "sales" ? formatCurrency(m.unit_price) : "-",
+            Number(formatCurrency2(m.purchase_price)),
+            m.type === "sales" ? Number(formatCurrency2(m.unit_price)) : "-",
             m.type === "sales"
-                ? formatCurrency(m.quantity * parseFloat(m.unit_price))
-                : formatCurrency(m.quantity * parseFloat(m.purchase_price)),
+                ? Number(formatCurrency2(m.quantity * parseFloat(m.unit_price)))
+                : Number(
+                      formatCurrency2(m.quantity * parseFloat(m.purchase_price))
+                  ),
         ]);
 
         const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
@@ -165,11 +171,11 @@ const Inventory = ({ _movements, product = null }) => {
             m.product.code,
             m.product_batch.batch_number,
             m.quantity,
-            formatCurrency(m.purchase_price),
-            m.type === "sales" ? formatCurrency(m.unit_price) : "-",
+            formatCurrency2(m.purchase_price),
+            m.type === "sales" ? formatCurrency2(m.unit_price) : "-",
             m.type === "sales"
-                ? formatCurrency(m.quantity * parseFloat(m.unit_price))
-                : formatCurrency(m.quantity * parseFloat(m.purchase_price)),
+                ? formatCurrency2(m.quantity * parseFloat(m.unit_price))
+                : formatCurrency2(m.quantity * parseFloat(m.purchase_price)),
         ]);
 
         const csvContent = [headers, ...rows]
