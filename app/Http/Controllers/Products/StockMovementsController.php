@@ -58,7 +58,7 @@ class StockMovementsController extends Controller
         $query->select('product_id', \DB::raw('SUM(quantity) as total_quantity'), \DB::raw('sum(total_unit_price) - sum(total_purchase_price) as total_profit'))
             ->groupBy(['product_id', 'type'])
             ->having('type', 'sales')
-            ->with(['product:id,name'])
+            ->with(['product:id,name,category_id,brand_id'])
             ->orderBy('total_quantity', 'desc')
             ->limit(10);
 

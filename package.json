@@ -16,6 +16,8 @@
     },
     "dependencies": {
         "@inertiajs/react": "^2.0.12",
+        "exceljs": "^4.4.0",
+        "file-saver": "^2.0.5",
         "lucide-react": "^0.511.0",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",

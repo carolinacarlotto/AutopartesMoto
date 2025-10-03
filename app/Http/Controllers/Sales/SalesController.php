@@ -9,9 +9,9 @@ class SalesController extends Controller
 {
     public function getSalesAnalytics(Request $request) 
     {
-        $salesTodayData = \App\Models\Sale::today()->get();
-        $salesThisWeekData = \App\Models\Sale::thisWeek()->get();
-        $salesThisMonthData = \App\Models\Sale::thisMonth()->get();
+        $salesTodayData = \App\Models\Sale::today()->with(['customer', 'user'])->get();
+        $salesThisWeekData = \App\Models\Sale::thisWeek()->with(['customer', 'user'])->get();
+        $salesThisMonthData = \App\Models\Sale::thisMonth()->with(['customer', 'user'])->get();
 
         $salesToday = \App\Models\Sale::today()->count();
         $salesThisWeek = \App\Models\Sale::thisWeek()->count();
@@ -58,8 +58,14 @@ class SalesController extends Controller
         $page = $request->input('page', 1);
         $perPage = $request->input('perPage', 10);
         $search = $request->input('search', '');
+        $all = $request->input('all', false);
 
         $query = \App\Models\Sale::query();
+
+        if ($all) {
+            $sales = $query->with(['customer', 'user'])->get();
+            return response()->json($sales);
+        }
 
         if ($search) {
             $query->where(function ($query) use ($search) {

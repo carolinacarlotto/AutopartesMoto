@@ -8,7 +8,7 @@ import SalesCard from "./Admin/Sales/Components/SalesCard.jsx";
 
 import { getSalesAnalytics } from "@/Services/sale.js";
 import { getTopSellingProducts } from "@/Services/products.js";
-
+import { downloadExcel } from "@/Utils/downloadExcel.js";
 
 
 export default function Home() {
@@ -57,39 +57,62 @@ export default function Home() {
     };
 
     const downloadExcelSales = (data = []) => {
-        const formattedData = data.map((item) => ({
-            //ID: item.id,
-            "Número de Documento": item.document_number,
-            "Fecha de Venta": item.sale_date,
-            "Subtotal": Number(item.subtotal || 0).toFixed(2),
-            "Ganancia": Number(item.discount || 0).toFixed(2),
-            "Impuesto": Number(item.tax || 0).toFixed(2),
-            "Total": Number(item.total || 0).toFixed(2),
-            "Método de Pago": item.payment_method,
-        }));
-
-        const worksheet = XLSX.utils.json_to_sheet(formattedData);
-
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Venta");
-
-        XLSX.writeFile(workbook, "venta.xlsx");
+        const dataMatrix = data.map((item, index) => [
+            index + 1,
+            "Boleta de Venta", // Hardcoded for now
+            item.document_number,
+            item.customer ? item.customer.name : "N/A",
+            item.customer
+                ? `${item.customer.document_type}: ${item.customer.document_number}`
+                : "N/A",
+            parseFloat(item.total).toFixed(2),
+            item.sale_date
+                ? new Date(item.sale_date).toLocaleDateString("es-PE") +
+                  " " +
+                  new Date(item.sale_date).toLocaleTimeString("es-PE")
+                : "N/A",
+            item.user ? item.user.name : "N/A",
+            item.payment_method ? item.payment_method : "N/A",
+        ]);
+        const dataExcel = {
+            fileName: "Reporte Ventas",
+            title: "REPORTE DE VENTAS 2024",
+            headerColor: "4472C4",
+            headers: [
+                "Nro",
+                "Tipo de Documento",
+                "Documento venta",
+                "Cliente",
+                "Documento",
+                "Total",
+                "Fecha de Venta",
+                "Usuario",
+                "Tipo de Pago"
+            ],
+            data: dataMatrix,
+            sheetName: "Ventas",
+        };
+        downloadExcel(dataExcel);
     };
 
     const downloadExcelProducts = (data = []) => {
-        const formattedData = data.map((item) => ({
-            Producto: item.product?.name || "",
-            Categoria: item.product?.category_name || "",
-            Cantidad: item.total_quantity || 0,
-            Ganancia: Number(item.total_profit || 0).toFixed(2),
-        }));
-
-        const worksheet = XLSX.utils.json_to_sheet(formattedData);
-
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Productos");
-
-        XLSX.writeFile(workbook, "productos.xlsx");
+        const dataMatrix = data.map((item, index) => [
+            index + 1,
+            item.product?.name || "",
+            item.product?.category_name || "",
+            item.product?.brand_name || "",
+            item.total_quantity || 0,
+            Number(item.total_profit || 0).toFixed(2),
+        ]);
+        const dataExcel = {
+            fileName: "Reporte Productos",
+            title: "REPORTE DE PRODUCTOS MÁS VENDIDOS 2024",
+            headerColor: "4472C4",
+            headers: ["Nro","Producto", "Categoría", "Marca", "Cantidad Vendida", "Total Ganancia"],
+            data: dataMatrix,
+            sheetName: "Productos",
+        };
+        downloadExcel(dataExcel);
     };
 
     React.useEffect(() => {

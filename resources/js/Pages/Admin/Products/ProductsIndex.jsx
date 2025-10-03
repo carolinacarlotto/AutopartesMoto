@@ -28,8 +28,11 @@ import ProductTechnicalSpecifications from './Components/ProductTechnicalSpecifi
 import ProductSheet from './Components/ProductSheet.jsx';
 
 import { getTopSellingProducts } from "@/Services/products.js";
+import { getProducts as getProductsApi } from "@/Services/products.js";
 
 import { useNotification } from "@/Providers/NotificationProvider.jsx";
+
+import { downloadExcel } from "@/Utils/downloadExcel.js";
 
 
 
@@ -166,6 +169,41 @@ export default function ProductsIndex() {
         }
     }
 
+    const downloadExcelProducts = async () => {
+        try {
+            const data = await getProductsApi({
+                all: true,
+            });
+            /**
+             * convert to matrix of arrays
+             */
+            const dataMatrix = data.map((item, index) => [
+                index + 1,
+                item.code,
+                item.name,
+                item.category_name,
+                item.brand_name,
+                item.measure_name,
+                item.stock,
+                item.minimum_stock,
+                parseFloat(item.price_sale).toFixed(2),
+            ]);
+
+            const dataExcel = {
+                fileName: "Reporte Productos",
+                title: "Reporte de Productos",
+                headers: ["Nro", "Código", "Nombre", "Categoría", "Marca", "Medida", "Stock", "Stock Mínimo", "Precio de Venta"],
+                headerColor: "4472C4",
+                data: dataMatrix,
+                sheetName: "Productos",
+            };
+            downloadExcel(dataExcel);
+        } catch (error) {
+            console.error("Error fetching products:", error);
+            return;
+        }
+    }
+
     React.useEffect(() => {
         getProducts();
         fetchTopSellingProducts();
@@ -278,12 +316,24 @@ export default function ProductsIndex() {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
                     Productos
                 </h2>
-                <button
-                    onClick={() => setCreateProductModal(true)}
-                    className="px-4 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                    Agregar Producto
-                </button>
+
+                <div>
+                    {/** Download Button **/}   
+                    <button
+                        onClick={() => downloadExcelProducts()}
+                        className="px-4 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mr-2"
+                    >
+                        Exportar
+                    </button>
+
+                    {/** Add Product Button **/}
+                    <button
+                        onClick={() => setCreateProductModal(true)}
+                        className="px-4 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        Agregar Producto
+                    </button>
+                </div>
             </div>
 
             <div className="mt-3 p-6 bg-white rounded-xl shadow-lg border border-gray-200">

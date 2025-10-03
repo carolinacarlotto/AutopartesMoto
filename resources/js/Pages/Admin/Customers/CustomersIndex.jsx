@@ -10,6 +10,7 @@ import CustomerForm from "./Components/CustomerForm.jsx";
 import { getCustomers, createCustomer } from "@/Services/customer.js";
 
 import { useNotification } from "@/Providers/NotificationProvider.jsx";
+import { downloadExcel } from "@/Utils/downloadExcel.js";
 
 export default function CustomersIndex() {
     const auth = usePage().props.auth;
@@ -56,6 +57,43 @@ export default function CustomersIndex() {
         }
     };
 
+    const downloadExcelCustomers = async () => {
+        try {
+            const data = await getCustomers({
+                all: true,
+            });
+            /**
+             * convert to matrix of arrays
+             */
+
+            const dataMatrix = data.map((item, index) => [
+                index + 1,
+                item.name,
+                item.document_type,
+                item.document_number,
+                item.email,
+                item.phone,
+                item.address,
+            ]);
+
+            console.log(dataMatrix);
+
+            const dataExcel = {
+                fileName: "Reporte Clientes",
+                title: "Reporte de Clientes",
+                headers: ["Nro","Nombre", "Documento", "Nro. Documento",  "Email", "Teléfono", "Dirección"],
+                headerColor: "4472C4",
+                data: dataMatrix,
+                sheetName: "Clientes",
+            };
+            downloadExcel(dataExcel);
+
+            
+        } catch (error) {
+            console.error("Error downloading customers report:", error);
+        }
+    }
+
     useEffect(() => {
         fetchCustomers();
     }, [page, perPage, search]);
@@ -78,6 +116,21 @@ export default function CustomersIndex() {
                 </>
             ),
         },
+        {
+            key: "email",
+            label: "Email",
+            render: (value) => value || "N/A",
+        },
+        {
+            key: "phone",
+            label: "Teléfono",
+            render: (value) => value || "N/A",
+        },
+        {
+            key: "address",
+            label: "Dirección",
+            render: (value) => value || "N/A",
+        }
     ];
 
     const actions = [
@@ -115,14 +168,24 @@ export default function CustomersIndex() {
         <AdminLayout auth={auth}>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-lg font-semibold">Clientes</h2>
-                <button
-                    onClick={() => setCreateCustomerModal(true)}
-                    className="px-4 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                    Agregar Cliente
-                </button>
+                <div>
+                    {/** Download Button **/}
+                    <button
+                        onClick={() => downloadExcelCustomers()}
+                        className="px-4 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mr-2"
+                    >
+                        Exportar
+                    </button>
+
+                    {/** Add Customer Button **/}
+                    <button
+                        onClick={() => setCreateCustomerModal(true)}
+                        className="px-4 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        Agregar Cliente
+                    </button>
+                </div>
             </div>
-            {/* Additional content can be added here */}
 
             <DynamicTable
                 enableSorting={false}

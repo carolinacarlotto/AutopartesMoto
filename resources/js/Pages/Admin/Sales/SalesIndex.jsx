@@ -11,6 +11,7 @@ import SaleInvoice from "./Components/SaleInvoice.jsx";
 import SalesCard from "./Components/SalesCard.jsx";
 
 import { getSales, getSale, getSalesAnalytics } from "@/Services/sale.js";
+import { downloadExcel } from "@/Utils/downloadExcel.js";
 
 export default function SalesIndex() {
     const auth = usePage().props.auth;
@@ -40,6 +41,56 @@ export default function SalesIndex() {
             setLastPage(data.last_page);
         } catch (error) {
             console.error("Error fetching sales:", error);
+        }
+    };
+
+    const downloadExcelSales = async () => {
+        try {
+            const data = await getSales({
+                all: true,
+            });
+            /**
+             * convert to matrix of arrays
+             */
+            const dataMatrix = data.map((item, index) => [
+                index + 1,
+                "Boleta de Venta", // Hardcoded for now
+                item.document_number,
+                item.customer ? item.customer.name : "N/A",
+                item.customer
+                    ? `${item.customer.document_type}: ${item.customer.document_number}`
+                    : "N/A",
+                parseFloat(item.total).toFixed(2),
+                item.sale_date
+                    ? new Date(item.sale_date).toLocaleDateString("es-PE") +
+                      " " +
+                      new Date(item.sale_date).toLocaleTimeString("es-PE")
+                    : "N/A",
+                item.user ? item.user.name : "N/A",
+                item.payment_method ? item.payment_method : "N/A",
+            ]);
+            const dataExcel = {
+                fileName: "Reporte Ventas",
+                title: "Reporte de Ventas",
+                headerColor: "4472C4",
+                headers: [
+                    "Nro",
+                    "Tipo de Documento",
+                    "Documento venta",
+                    "Cliente",
+                    "Documento",
+                    "Total",
+                    "Fecha de Venta",
+                    "Usuario",
+                    "Tipo de Pago"
+                ],
+                data: dataMatrix,
+                sheetName: "Ventas",
+            };
+            downloadExcel(dataExcel);
+        } catch (error) {
+            console.error("Error fetching sales:", error);
+            return;
         }
     };
 
@@ -194,12 +245,26 @@ export default function SalesIndex() {
                 <h2 className="text-3xl font-bold text-gray-800 mb-2">
                     Ventas
                 </h2>
-                <button
-                    onClick={() => setCreateProductModal(true)}
-                    className="px-4 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                >
-                    Agregar Venta
-                </button>
+
+                <div>
+
+                    {/** Download Button **/}
+
+                    <button
+                        onClick={() => downloadExcelSales()}
+                        className="px-4 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors mr-2"
+                    >
+                        Descargar
+                    </button>
+
+                    {/** Add Sale Button **/}
+                    <button
+                        onClick={() => setCreateProductModal(true)}
+                        className="px-4 py-1 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                        Agregar Venta
+                    </button>
+                </div>
             </div>
 
             <div className="p-4 bg-white rounded-xl shadow-sm border border-gray-200">
