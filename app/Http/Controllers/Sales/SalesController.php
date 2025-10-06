@@ -106,7 +106,16 @@ class SalesController extends Controller
             'items.*.quantity' => 'required|integer|min:1',
         ]);
 
-        $documentNumber = 'S' . now()->format('YmdHis');
+        /*$documentNumber = 'S' . now()->format('YmdHis');
+        $data['document_number'] = $documentNumber;*/
+        $customer = \App\Models\Customer::findOrFail($data['customer']['id']);
+        if ($customer->document_type == 'RUC') {
+            $fCounts = \App\Models\Sale::where('document_number', 'like', '%F%')->count();
+            $documentNumber = 'F-' . str_pad($fCounts + 1, 8, '0', STR_PAD_LEFT);
+        } else {
+            $bCounts = \App\Models\Sale::where('document_number', 'like', '%B%')->count();
+            $documentNumber = 'B-' . str_pad($bCounts + 1, 8, '0', STR_PAD_LEFT);
+        }
         $data['document_number'] = $documentNumber;
 
         $dataSale = [

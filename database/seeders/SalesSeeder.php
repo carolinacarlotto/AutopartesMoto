@@ -52,16 +52,30 @@ class SalesSeeder extends Seeder
             for ($i = 0; $i <= $days; $i++) {
                 $date = $startOfYear->copy()->addDays($i);
                 echo "Seeding sales for date: " . $date->toDateString() . "\n";
-                $salesCount = rand(4, 15);
+                $salesCount = rand(4, 10);
+                $hourStart = 8; // 8 AM
                 for ($j = 0; $j < $salesCount; $j++) {
                     echo "  Creating sale " . ($j + 1) . " of $salesCount\n";
                     $data = [];
                     //$documentNumber = 'S' . now()->format('YmdHis');
-                    $documentNumber = 'S' . $date->format('Ymd') . str_pad($j + 1, 4, '0', STR_PAD_LEFT);
+                    /*$documentNumber = 'S' . $date->format('Ymd') . str_pad($j + 1, 4, '0', STR_PAD_LEFT);
+                    $data['document_number'] = $documentNumber;*/
+                    $dateSale = $date->copy()->addHours($hourStart)->addMinutes(rand(0, 59))->addSeconds(rand(0, 59));
+                    $hourStart = $hourStart + 1;
+                    $customer = \App\Models\Customer::inRandomOrder()->first();
+                    // id document type dni: document_number B-00000001 or RUC: document_number F-00000001
+                    // document number must be unique and 8 digits for dni and 11 for ruc, no contains letters except B- or F- at the beginning, no contains date or time
+                    if ($customer->document_type == 'RUC') {
+                        $fCounts = \App\Models\Sale::where('document_number', 'like', '%F%')->count();
+                        $documentNumber = 'F-' . str_pad($fCounts + 1, 8, '0', STR_PAD_LEFT);
+                    } else {
+                        $bCounts = \App\Models\Sale::where('document_number', 'like', '%B%')->count();
+                        $documentNumber = 'B-' . str_pad($bCounts + 1, 8, '0', STR_PAD_LEFT);
+                    }
                     $data['document_number'] = $documentNumber;
-                    $dateSale = $date->copy()->addHours(rand(8, 18))->addMinutes(rand(0, 59))->addSeconds(rand(0, 59));
+
                     $dataSale = [
-                        'customer_id' => \App\Models\Customer::inRandomOrder()->first()->id,
+                        'customer_id' => $customer->id,
                         'document_number' => $documentNumber,
                         'subtotal' => 0,
                         'discount' => 0,

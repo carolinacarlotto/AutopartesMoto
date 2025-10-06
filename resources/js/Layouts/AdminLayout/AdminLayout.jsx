@@ -37,7 +37,7 @@ const AdminLayout = ({ auth, children }) => {
                     setIsSidebarExpanded={setIsSidebarExpanded}
                 />
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 transition-all duration-300">
-                    <NotificationSystem />
+                    {/*<NotificationSystem />*/}
                     {children}
                     {/*<Footer />*/}
                 </main>

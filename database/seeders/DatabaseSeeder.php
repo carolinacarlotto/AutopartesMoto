@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
 
         User::factory()->create([
             'name' => 'Mi usuario',
-            'email' => 'ventas@autopartes.rl',
+            'email' => 'raul_namay@hotmail.com',
             'password' => bcrypt('usuario2025!'), // Ensure to hash the password
             'email_verified_at' => now(), // Set email verification date
         ])->assignRole('admin'); // Assign the admin role to the user

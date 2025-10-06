@@ -3617,6 +3617,7 @@ class ProductsSeeder extends Seeder
                 'code' => $product['code'],
                 'name' => $product['name'],
                 'stock' => 0,
+                'minimum_stock' => 3,
                 'category_id' => $category->id,
                 'brand_id' => $brand->id,
                 'measure_id' => $unit->id,

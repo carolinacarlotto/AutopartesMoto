@@ -37,7 +37,7 @@ const ProductSheet = ({ product }) => {
     };
 
     const formatPrice = (price) => {
-        return `$${parseFloat(price).toFixed(2)}`;
+        return `S/ ${parseFloat(price).toFixed(2)}`;
     };
 
     const getStockStatus = () => {

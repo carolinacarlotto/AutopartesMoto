@@ -40,6 +40,7 @@ export default function ProductsIndex() {
     const auth = usePage().props.auth;
     const { success, error, warning, info } = useNotification();
 
+    const [listName, setListName] = useState("products"); // You can change this to "lowStockProducts" when needed
     const [topProducts, setTopProducts] = useState([]);
     const [products, setProducts] = React.useState([]);
     const [page, setPage] = React.useState(1);
@@ -117,6 +118,18 @@ export default function ProductsIndex() {
             })
             .catch(error => {
                 console.error("There was an error fetching the products!", error);
+            });
+    }
+
+    const getLowStockProducts = () => {
+        axios.get(route('admin.products.getLowStock'))
+            .then(response => {
+                setProducts(response.data || []);
+                setLastPage(1);
+                setTotal(response.data.total || 0);
+            })
+            .catch(error => {
+                console.error("There was an error fetching the low stock products!", error);
             });
     }
 
@@ -307,6 +320,15 @@ export default function ProductsIndex() {
             className: "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20",
         },*/
     ];
+
+    const handleChangeListName = (name) => {
+        setListName(name);
+        if (name === "products") {
+            getProducts();
+        } else if (name === "lowStockProducts") {
+            getLowStockProducts();
+        }
+    }
     
     return (
         <AdminLayout auth={auth}>
@@ -318,6 +340,14 @@ export default function ProductsIndex() {
                 </h2>
 
                 <div>
+                    {/** Low Stock Products Button **/}
+                    <button
+                        onClick={() => handleChangeListName(listName === "products" ? "lowStockProducts" : "products")}
+                        className="px-4 py-1 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors mr-2"
+                    >
+                        {listName === "products" ? "Productos con bajo stock" : "Todos los productos"}
+                    </button>
+
                     {/** Download Button **/}   
                     <button
                         onClick={() => downloadExcelProducts()}
