@@ -218,7 +218,7 @@ export default function SalesIndex() {
             onClick: (row) => alert(`Registrar venta de ${row.document_number}`),
             //show: (row) => row.activo, // Solo mostrar si está activo
         },*/
-        { divider: true },
+        /*{ divider: true },
         {
             key: "delete",
             label: "Eliminar",
@@ -229,7 +229,7 @@ export default function SalesIndex() {
                 }
             },
             className: "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20",
-        },
+        },*/
     ];
 
     return (
